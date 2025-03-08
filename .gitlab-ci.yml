@@ -1,0 +1,33 @@
+image: docker:latest
+
+stages:
+  - build
+  - test
+  - deploy
+
+build_backend:
+  stage: build
+  script:
+    - docker-compose build backend-dev
+  only:
+    - development
+
+test_backend:
+  stage: test
+  script:
+    - docker-compose up -d backend-test
+    - docker exec container_back_test npm run test
+    - sleep 3
+    - docker-compose down
+  only:
+    - development
+
+deploy_dev:
+  stage: deploy
+  variables:
+  script:
+    - docker-compose up -d backend-dev
+  environment:
+    name: development
+  only:
+    - development
