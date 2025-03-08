@@ -9,6 +9,9 @@ import { errorHandler, notFound } from './middleware/errorMiddleware.js'
 import { configureSecurity } from './middleware/securityMiddleware.js'
 import sessionConfig from './middleware/sessionConfig.js'
 import { configureRoutes } from './routes/index.js'
+import { ApolloServer } from 'apollo-server-express'
+import typeDefs from './graphql/schema.js'
+import resolvers from './graphql/resolvers.js'
 
 dotenv.config()
 
@@ -21,6 +24,17 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'Cache-Control'],
   exposedHeaders: ['X-CSRF-Token'],
 }
+
+const apolloServer = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ({ req }) => ({}),
+})
+
+await apolloServer.start()
+apolloServer.applyMiddleware({ app, path: '/graphql' })
+
+console.log(`GraphQL server http://localhost:${process.env.PORT || 4000}/graphql`)
 
 app.use(cors(corsOptions))
 app.use(passport.initialize())
